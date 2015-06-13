@@ -21,6 +21,19 @@ function make_ship(x,y)
 	return a
 end
 
+function make_explosion(a)
+	local e={}
+	e.x=a.x
+	e.y=a.y
+	e.vel=a.vel
+	e.s={10,2,2}
+	e.time=0
+
+ add(explosions,e)
+
+ return e
+end
+
 function make_bad_ship(x,y)
 	local a={}
 	a.vel={-10-rnd(40),0}
@@ -84,6 +97,7 @@ function update_bad_ship(s,dt)
  		sfx(3)
  		del(bad_shipz,s)
  		del(bullets,b)
+ 		make_explosion(s)
  	end
  end 
 end
@@ -94,6 +108,13 @@ function update_bullet(b,dt)
 	if (b.x>128) then 
 		del(bullets,b)
 	end
+end
+
+function update_explosion(e,dt)
+	e.x+=e.vel[1]*dt
+	e.time+=dt
+	if (e.time>0.1) e.s={12,2,2}
+	if (e.time>0.2) del(explosions,e)
 end
 
 function draw_actor(a)
@@ -123,6 +144,9 @@ function _update()
 	for bad in all(bad_shipz) do
 		update_bad_ship(bad,dt)
 	end
+	for e in all(explosions) do 
+	 update_explosion(e,dt)
+	end
 	
 	bg.x=(bg.x+shipz[1].vel[1]*dt)%128
 	
@@ -135,6 +159,7 @@ function _draw()
  foreach(shipz,draw_actor)
  foreach(bullets,draw_actor)
 	foreach(bad_shipz,draw_actor)
+	foreach(explosions,draw_actor)
 	print(#bullets)
 end
 
@@ -145,6 +170,7 @@ function _init()
 	shipz={}
 	bad_shipz={}
 	bullets={}
+	explosions={}
 	make_ship(2,0)
 	bg={}
 	bg.x=0

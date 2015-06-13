@@ -1,7 +1,62 @@
 pico-8 cartridge // http://www.pico-8.com
 version 4
 __lua__
+-- shipz
+-- gam lavell bros
+-- art jared cohen
+-- #lacrew +++ get yamcha +++
+g=2
 
+function make_bomb(x,y)
+	local a={}
+	a.vel=0
+	a.acl=g
+	a.x=x
+	a.y=y
+ 
+ add(bombs, a)
+ 
+	return a
+end
+
+function update_bomb(b,dt)
+	b.vel+=b.acl*dt
+	b.y+=b.vel
+	if (b.y > 128) then
+		del(b,bombs)
+	end
+end
+
+function draw_actor(a)
+	spr(0,a.x,a.y,4,4)
+end
+
+function _update()
+	dt=time()-last_time
+	for bomb in all(bombs) do
+		update_bomb(bomb,dt)
+	end
+	
+	if (btnp(0,0)) then
+		make_bomb(25+rnd(80),0)
+	end
+	
+	lasttime=time()	
+end
+	
+function _draw()
+	rectfill(0,0,128,128,6)
+ rectfill(0,0,25,128,0)
+ rectfill(103,0,128,128,0)
+ foreach(bombs,draw_actor)
+ print(count(bombs),0,0,7)
+end
+
+function _init()
+	last_time=time()
+	bombs={}
+	make_bomb(26,0)
+end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000bbbb0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

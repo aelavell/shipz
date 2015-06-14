@@ -13,7 +13,7 @@ function make_ship(x,y)
 	a.acl=g
 	a.x=x
 	a.y=y
- a.force=g*1.2
+ a.force=g*0.8
 	a.s={0,3,2}
  
  add(shipz,a)
@@ -28,7 +28,7 @@ function make_explosion(a)
 	e.vel=a.vel
 	e.s={10,2,2}
 	e.time=0
-
+	sfx(3)
  add(explosions,e)
 
  return e
@@ -38,7 +38,7 @@ function make_bad_ship(x,y)
 	local a={}
 	a.vel={-10-rnd(40),0}
 	a.x=130+rnd(50)
-	a.y=32+rnd(64)
+	a.y=16+rnd(92)
 	if flr(rnd(2))==0 then
 		a.s={4,2,3}
 	else
@@ -75,12 +75,36 @@ function update_ship(s,dt)
 	
 	s.vel[2]+=s.acl*dt
 	s.y+=s.vel[2]
+	
+	if (s.y > 140 or s.y < -20) game_over(s)
+	
+	for b in all(bad_shipz) do
+ 	if 
+ 	(
+ 	((s.x + s.s[2]*8 >= b.x + 8) and 
+ 	(s.x < b.x + b.s[2]*8)) 
+ 	and
+ 	((s.y >= b.y) and 
+ 	(s.y + s.s[3]*8 <= b.y + b.s[3]*8))
+ 	)
+ 	then
+ 		del(bad_shipz,b)
+ 		make_explosion(b)
+	  game_over(s)
+ 	end
+ end
+end
+
+function game_over(s)
+	del(shipz,s)
+	make_explosion(s)
 end
 
 function update_bad_ship(s,dt)
-	s.x+=(-shipz[1].vel[1]+s.vel[1])*dt
+	s.x+=(-main_ship_vel+s.vel[1])*dt
  
  if (s.x<-32) then
+  score-=1
  	del(bad_shipz,s) 	
  end
  
@@ -94,10 +118,10 @@ function update_bad_ship(s,dt)
  	(b.y + b.s[3]*8 <= s.y + s.s[3]*8))
  	)
  	then
- 		sfx(3)
  		del(bad_shipz,s)
  		del(bullets,b)
  		make_explosion(s)
+ 		score+=1
  	end
  end 
 end
@@ -123,7 +147,7 @@ end
 
 function spawn()
 	if (time()-last_spawn>spawn_time) then
-		for i=0,1+rnd(1) do
+		for i=0,1+rnd(3) do
 			make_bad_ship()
 		end
 		
@@ -148,7 +172,7 @@ function _update()
 	 update_explosion(e,dt)
 	end
 	
-	bg.x=(bg.x+shipz[1].vel[1]*dt)%128
+	bg.x=(bg.x+main_ship_vel*dt)%128
 	
 	last_time=time()	
 end
@@ -160,7 +184,7 @@ function _draw()
  foreach(bullets,draw_actor)
 	foreach(bad_shipz,draw_actor)
 	foreach(explosions,draw_actor)
-	print(#bullets)
+	print(score)
 end
 
 function _init()
@@ -174,6 +198,8 @@ function _init()
 	make_ship(2,0)
 	bg={}
 	bg.x=0
+	main_ship_vel=70
+	score=0
 	music(0,0,1+2+4)
 end
 __gfx__
